@@ -1,24 +1,13 @@
 from aocd import submit
 from aoc.helpers import input_lines
-import numpy as np
-from typing import List
+from itertools import count
 
 
 EX_FILE = "example.txt"
 FILE = "input.txt"
 
 
-def gimme_2d_arr_np(lines: List[str], dtype) -> np.ndarray:
-    return np.array([list(line.strip()) for line in lines], dtype=dtype)
-
-
-count = -1
-
-
-def get_next_id():
-    global count
-    count += 1
-    return count
+id_gen = count()
 
 
 def get_parsed_block(line):
@@ -26,7 +15,7 @@ def get_parsed_block(line):
     out_block = []
     for i, c in enumerate(line):
         if i % 2 == 0:
-            next_block = [get_next_id()] * int(c)
+            next_block = [next(id_gen)] * int(c)
             out_block.append(next_block)
         else:
             if c != "0":
@@ -34,45 +23,47 @@ def get_parsed_block(line):
     return out_block
 
 
-def move_file_blocks(blocks):
-    """
-    Move files from the rightmost position to the leftmost free space large enough to fit the file.
-    Process files in decreasing order of their ID, ensuring each file moves only once.
-    """
-    file_idx = len(blocks) - 1  # Start from the rightmost block
+def move_file_blocks(li):
+    p1 = 0
+    p2 = len(li) - 1
 
-    while file_idx >= 0:
-        current_block = blocks[file_idx]
-
-        # If this is a free space block (not a file), skip it
-        if "." in current_block:
-            file_idx -= 1
+    while p2 > 0:
+        if p1 > p2:
+            p1 = 0
+            p2 -= 1
+            continue
+        if "." not in li[p1]:
+            p1 += 1
+            continue
+        if "." in li[p2]:
+            p2 -= 1
             continue
 
-        file_len = len(current_block)  # The size of the file to move
+        free_len = len(li[p1])
+        num_len = len(li[p2])
 
-        # Try to find the leftmost space where this file can fit
-        # Loop backwards from file_idx-1 to 0
-        for free_idx in range(file_idx - 1, -1, -1):
-            free_block = blocks[free_idx]
-
-            if "." in free_block and len(free_block) >= file_len:
-                # We found enough free space; move the file there
-                blocks[free_idx] = current_block + free_block[file_len:]
-                blocks[file_idx] = ["."] * file_len
-                break  # Move the next file after this one is placed
-
-        file_idx -= 1
-
-    # Optionally, compact free spaces at the end of the list for cleaner output (not mandatory)
-    compacted_blocks = []
-    for block in blocks:
-        if compacted_blocks and "." in block and "." in compacted_blocks[-1]:
-            compacted_blocks[-1] += block  # Merge consecutive free blocks
+        if free_len == num_len:
+            li[p1], li[p2] = li[p2], li[p1]
+            p2 -= 1
+            p1 = 0
+        elif free_len > num_len:
+            li[p1] = li[p2]
+            li[p2] = ["."] * num_len
+            p1 += 1
+            li.insert(p1, ["."] * (free_len - num_len))
+            if p1 > 0 and "." in li[p1 - 1]:
+                li[p1] = li[p1 - 1] + li[p1]
+                li.pop(p1 - 1)
+                p2 -= 1
+            while p1 < len(li) - 1 and "." in li[p1 + 1]:
+                li[p1] = li[p1] + li[p1 + 1]
+                li.pop(p1 + 1)
+                p2 -= 1
+            p1 = 0
         else:
-            compacted_blocks.append(block)
+            p1 += 1
 
-    return compacted_blocks
+    return li
 
 
 raw_data = open(FILE, 'r').read()
@@ -83,11 +74,9 @@ for i, line in enumerate(lines):
     parsed = get_parsed_block(line)
     moved = move_file_blocks(parsed)
 
-flattened_moved = [item for sublist in moved for item in sublist]
-total = 0
-for i, c in enumerate(flattened_moved):
-    if c != ".":
-        total += i * int(c)
-print(total)
+flattened = [item for sublist in moved for item in sublist]
+result = sum(index * int(value)
+             for index, value in enumerate(flattened) if value != ".")
+print(result)
 
 # 6377400869326 correct answer
