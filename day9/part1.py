@@ -40,27 +40,6 @@ def get_parsed_block(line):
     return out_block
 
 
-# def get_next_number(li, p1):
-#     if li[p1] == "[":
-#         p1 += 1
-#         full_num = ""
-#         while li[p1] != "]":
-#             full_num += li[p1]
-#             p1 += 1
-#         return full_num, p1+1
-#     else:
-#         return li[p1], p1+1
-
-
-# def get_next_number_left(li, p2):
-#     p2 -= 1
-#     full_num = ""
-#     while li[p2] != "[":
-#         full_num += li[p2]
-#         p2 -= 1
-#     return full_num
-
-
 def move_file_blocks(li):
     p1 = 0
     p2 = len(li) - 1
