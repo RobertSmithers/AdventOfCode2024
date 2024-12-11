@@ -22,7 +22,9 @@ if os.path.exists('template.py') and not os.path.exists(template_path_out):
 with open(os.path.join(directory, 'example.txt'), 'w') as f:
     pass
 
-data = get_data(day=day, year=2024, block=True)
-
-with open(os.path.join(directory, 'input.txt'), 'w') as f:
-    f.write(data)
+try:
+    data = get_data(day=day, year=2024, block=True)
+    with open(os.path.join(directory, 'input.txt'), 'w') as f:
+        f.write(data)
+except KeyboardInterrupt:
+    print('\nExiting...')
