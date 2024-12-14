@@ -112,7 +112,6 @@ while True:
                 f.write(
                     "".join(map(lambda v: " " if v == 0 else str(v), row)) + "\n")
         next = input("Continue? (enter)")
-        break
 
 print(seconds)
 
