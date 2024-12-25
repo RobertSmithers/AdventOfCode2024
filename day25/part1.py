@@ -1,6 +1,3 @@
-from typing import List
-
-
 def calculate_heights(lines, is_key):
     check = "." if is_key == "lock" else "#"
     heights = [-1 for _ in range(len(lines[0]))]
@@ -17,7 +14,7 @@ def is_overlapping(lock_heights, key_heights):
     return any(lh + kh > valid_height for lh, kh in zip(lock_heights, key_heights))
 
 
-def parse_input(lines: List[str]):
+def parse_input(lines):
     locks, keys, curr = [], [], []
     for line in lines:
         if line.strip() == "":
